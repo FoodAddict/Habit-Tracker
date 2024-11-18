@@ -7,6 +7,12 @@
         {% for habit in habits %}
             <li>
                 <span>{{ habit.name }} (Streak: {{ habit.streak }} days)</span>
+                {% if habit.last_check_in %}
+                    <small>Last Check-in: {{ habit.last_check_in.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                {% endif %}
+                <form action="{{ url_for('main.check_in', habit_id=habit.id) }}" method="post" class="inline-form">
+                    <button type="submit" class="btn">Check In</button>
+                </form>
                 <form action="{{ url_for('main.delete_habit', habit_id=habit.id) }}" method="post" class="inline-form">
                     <button type="submit" class="btn danger">Delete</button>
                 </form>
@@ -23,5 +29,28 @@
         </div>
         <button type="submit" class="btn">Add Habit</button>
     </form>
+
+    <!-- Timer Display -->
+    <p id="timer"></p>
 </div>
+
+<!-- JavaScript Function for Timer -->
+<script>
+    function calculateTimeUntilMidnight() {
+        const now = new Date();
+        const tomorrow = new Date();
+        tomorrow.setDate(now.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0); // Set to midnight
+
+        const diff = tomorrow - now;
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('timer').innerText = `Next check-in available in ${hours}h ${minutes}m ${seconds}s`;
+    }
+
+    // Call the function every second
+    setInterval(calculateTimeUntilMidnight, 1000);
+</script>
 {% endblock %}

@@ -4,10 +4,16 @@ from flask_bcrypt import Bcrypt
 from flask_login import login_user, logout_user, login_required, current_user, LoginManager
 import re
 import html
+from datetime import datetime, timedelta
+
 
 main_blueprint = Blueprint('main', __name__)
 login_manager = LoginManager()
 login_manager.login_view = 'main.login'
+
+@main_blueprint.route('/')
+def index():
+    return render_template('index.html', title="Home")
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -23,6 +29,12 @@ def register():
         username = sanitize_input(request.form.get('username'))
         email = sanitize_input(request.form.get('email'))
         password = sanitize_input(request.form.get('password'))
+
+        # Check if the email already exists
+        existing_user = User.query.filter_by(email=email).first()
+        if existing_user:
+            flash('Email already exists. Please choose a different email.', 'danger')
+            return redirect(url_for('main.register'))
 
         if not re.match(r"^[a-zA-Z0-9_]+$", username):
             flash('Invalid username. Use letters, numbers, and underscores only.', 'danger')
@@ -42,11 +54,14 @@ def login():
         email = sanitize_input(request.form.get('email'))
         password = sanitize_input(request.form.get('password'))
         user = User.query.filter_by(email=email).first()
-        if user and Bcrypt().check_password_hash(user.password, password):
-            login_user(user)
-            return redirect(url_for('main.dashboard'))
+        if user:
+            if Bcrypt().check_password_hash(user.password, password):
+                login_user(user)
+                return redirect(url_for('main.dashboard'))
+            else:
+                flash('Incorrect password. Please try again.', 'danger')
         else:
-            flash('Login unsuccessful. Please check your email and password.', 'danger')
+            flash('Email does not exist. Please register first.', 'danger')
     return render_template('login.html', title="Login")
 
 @main_blueprint.route('/dashboard')
@@ -85,9 +100,22 @@ def delete_habit(habit_id):
         flash('You do not have permission to delete this habit.', 'danger')
     return redirect(url_for('main.dashboard'))
 
-@main_blueprint.route('/')
-def index():
-    habits = []
-    if current_user.is_authenticated:
-        habits = Habit.query.filter_by(user_id=current_user.id).all()
-    return render_template('index.html', habits=habits, title="Home - Habit Management and Strategies")
+
+@main_blueprint.route('/check_in/<int:habit_id>', methods=['POST'])
+@login_required
+def check_in(habit_id):
+    habit = Habit.query.get_or_404(habit_id)
+    if habit.owner != current_user:
+        flash('You do not have permission to check in for this habit.', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    current_time = datetime.now()
+    if habit.last_check_in is None or (current_time - habit.last_check_in).days >= 1:
+        habit.streak += 1
+        habit.last_check_in = current_time
+        db.session.commit()
+        flash('Check-in successful! Your streak has been updated.', 'success')
+    else:
+        flash('You have already checked in today. Please come back tomorrow.', 'info')
+
+    return redirect(url_for('main.dashboard'))

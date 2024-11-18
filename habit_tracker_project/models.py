@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import UserMixin, LoginManager
@@ -18,5 +19,5 @@ class Habit(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     streak = db.Column(db.Integer, default=0)
+    last_check_in = db.Column(db.DateTime, nullable=True)  # New field for last check-in date
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
