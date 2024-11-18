@@ -85,3 +85,9 @@ def delete_habit(habit_id):
         flash('You do not have permission to delete this habit.', 'danger')
     return redirect(url_for('main.dashboard'))
 
+@main_blueprint.route('/')
+def index():
+    habits = []
+    if current_user.is_authenticated:
+        habits = Habit.query.filter_by(user_id=current_user.id).all()
+    return render_template('index.html', habits=habits, title="Home - Habit Management and Strategies")
