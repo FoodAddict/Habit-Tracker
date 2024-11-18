@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Welcome to Habit Management and Strategies</h1>
+    <p>Learn how to form lasting habits, break bad ones, and build routines that stick!</p>
+
+    <h2>Habit Tips and Strategies</h2>
+    <p>Building a habit can be challenging, but with the right mindset and techniques, you can create habits that last a lifetime. Here are some key strategies to help you:</p>
+    <ul>
+        <li><strong>Start small:</strong> Focus on creating tiny changes at first. Build momentum slowly.</li>
+        <li><strong>Consistency is key:</strong> The more consistent you are, the easier the habit becomes.</li>
+        <li><strong>Track your progress:</strong> Tracking your habits can help you see improvements over time and stay motivated.</li>
+        <li><strong>Reward yourself:</strong> Celebrate milestones to reinforce positive behavior.</li>
+        <li><strong>Use Habit Stacking:</strong> Attach a new habit to an existing routine. For example, meditate for 5 minutes after your morning coffee.</li>
+        <li><strong>Make it easy:</strong> Reduce friction by setting up your environment to make the habit easier to follow.</li>
+        <li><strong>Set SMART goals:</strong> Specific, Measurable, Achievable, Relevant, and Time-bound goals.</li>
+        <li><strong>Find accountability:</strong> Share your goals with friends or join a community for support.</li>
+    </ul>
+
+    {% if current_user.is_authenticated %}
+    <h2>Your Habit Dashboard</h2>
+    <h3>Manage Your Habits</h3>
+    <ul class="habit-list">
+        {% for habit in habits %}
+            <li>
+                <span>{{ habit.name }} (Streak: {{ habit.streak }} days)</span>
+                <form action="{{ url_for('main.delete_habit', habit_id=habit.id) }}" method="post" class="inline-form">
+                    <button type="submit" class="btn danger">Delete</button>
+                </form>
+            </li>
+        {% else %}
+            <li>No habits yet. Add one below!</li>
+        {% endfor %}
+    </ul>
+    <h3>Add a New Habit</h3>
+    <form action="{{ url_for('main.add_habit') }}" method="post">
+        <div class="form-group">
+            <label for="name">Habit Name:</label>
+            <input type="text" name="name" id="name" required>
+        </div>
+        <button type="submit" class="btn">Add Habit</button>
+    </form>
+    {% else %}
+    <p><a href="{{ url_for('main.register') }}">Register</a> or <a href="{{ url_for('main.login') }}">login</a> to start managing your habits and track your progress!</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f6f9;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: #58cc02;
+    padding: 1em;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+}
+
+.navbar a {
+    color: white;
+    margin: 0 1em;
+    text-decoration: none;
+}
+
+.container {
+    max-width: 600px;
+    margin: 2em auto;
+    background: white;
+    padding: 1.5em;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    margin-bottom: 1em;
+}
+
+.form-group {
+    margin-bottom: 1em;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+input[type="text"], input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 0.5em;
+    margin-bottom: 1em;
+}
+
+button.btn {
+    background-color: #58cc02;
+    color: white;
+    border: none;
+    padding: 0.5em 1em;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button.btn.danger {
+    background-color: #ff4d4d;
+}
+
+button.btn:hover {
+    opacity: 0.9;
+}
+
+ul.habit-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul.habit-list li {
+    margin: 0.5em 0;
+}
+
+.inline-form {
+    display: inline;
+}
+
+.flashes {
+    list-style-type: none;
+    padding: 0;
+    margin-bottom: 1em;
+}
+
+.flashes li {
+    margin: 0.5em 0;
+    padding: 0.5em;
+    background-color: #ffefc1;
+    border: 1px solid #ffd700;
+    border-radius: 3px;
+}
