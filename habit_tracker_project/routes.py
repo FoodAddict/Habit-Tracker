@@ -75,6 +75,55 @@ def logout():
     logout_user()
     return redirect(url_for('main.login'))
 
+@main_blueprint.route('/admin', methods=['GET', 'POST'])
+@login_required
+def admin_panel():
+    if not current_user.is_admin:
+        flash("You do not have permission to access this page.", "danger")
+        return redirect(url_for("main.dashboard"))
+
+    users = User.query.all()  # Fetch all users
+    return render_template('admin.html', users=users, title="Admin Panel")
+
+@main_blueprint.route('/delete_user/<int:user_id>', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    if not current_user.is_admin:  # Ensure only admins can delete users
+        flash("You do not have permission to perform this action.", "danger")
+        return redirect(url_for("main.admin_panel"))
+
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash("You cannot delete your own account.", "danger")
+        return redirect(url_for("main.admin_panel"))
+
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"User {user.username} deleted successfully.", "success")
+    return redirect(url_for("main.admin_panel"))
+
+@main_blueprint.route('/reset_password/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def reset_password(user_id):
+    if not current_user.is_admin:  # Ensure only admins can reset passwords
+        flash("You do not have permission to perform this action.", "danger")
+        return redirect(url_for("main.admin_panel"))
+
+    user = User.query.get_or_404(user_id)
+    if request.method == 'POST':
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+
+        if new_password and new_password == confirm_password:
+            hashed_password = Bcrypt().generate_password_hash(new_password).decode('utf-8')
+            user.password = hashed_password
+            db.session.commit()
+            flash(f"Password for {user.username} reset successfully.", "success")
+            return redirect(url_for("main.admin_panel"))
+        flash("Passwords do not match. Please try again.", "danger")
+
+    return render_template('reset_password.html', user=user)
+
 @main_blueprint.route('/add_habit', methods=['POST'])
 @login_required
 def add_habit():
