@@ -1,0 +1,47 @@
+log_format upstreamlog '$server_name to: $upstream_addr [$request] '
+        'upstream_response_time $upstream_response_time '
+        'msec $msec request_time $request_time';
+
+upstream cluster {
+        server <ip1>:5000;
+        server <ip2>:5000;
+        server <ip3>:5000;
+
+
+}
+
+server {
+        access_log /var/log/nginx/access.log upstreamlog;
+        listen 80 default_server;
+        listen [::]:80 default_server;
+
+
+        # SSL configuration
+
+        listen 443 ssl;
+        server_name _;
+        ssl_certificate /etc/nginx/ssl/nginx.crt;
+        ssl_certificate_key /etc/nginx/ssl/nginx.key;
+        ssl_protocols       TLSv1.2 TLSv1.3;
+        ssl_ciphers         HIGH:!aNULL:!MD5;
+
+        root /var/www/html;
+
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name _;
+
+        location / {
+                proxy_pass http://cluster;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header X-Forwarded-Host $host;
+                proxy_set_header X-Forwarded-Prefix /;
+        }
+
+
+        location /application {
+                proxy_pass http://cluster;
+        }
+
+}
